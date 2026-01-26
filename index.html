@@ -53,7 +53,8 @@
         .sol-title { color: var(--navy); font-weight: bold; font-size: 16px; display: block; margin-bottom: 8px; }
 
         .footer-note { font-size: 11px; color: #888; margin-top: 30px; text-align: center; }
-        .print-btn { background: var(--navy); color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 17px; }
+        .print-btn { background: var(--navy); color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 17px; transition: opacity 0.3s; }
+        .print-btn:disabled { opacity: 0.6; cursor: wait; }
 
         @media print { 
             @page { size: A4 portrait; margin: 10mm; }
@@ -71,7 +72,7 @@
 
     <div class="client-section">
         <span style="white-space:nowrap; margin-right:15px; font-size: 14px; font-weight: bold;">FOR CLIENT:</span>
-        <input type="text" class="client-name" placeholder="貴社名を入力してください">
+        <input type="text" class="client-name" id="clientNameInput" placeholder="貴社名を入力してください">
     </div>
 
     <section id="section-phase1">
@@ -174,10 +175,16 @@
         </footer>
     </section>
 
-    <button class="print-btn" onclick="window.print()">レポートをPDF保存・印刷</button>
+    <button class="print-btn" onclick="handlePrintAndSave()">レポートをPDF保存・印刷</button>
 </div>
 
 <script>
+    // ==========================================
+    // ▼ スプレッドシート連携用設定 (ここを書き換えてください)
+    // ==========================================
+    const scriptURL = "【https://script.google.com/macros/s/AKfycbxMtdpGUi2ONAtUln8ejoXT9mK0DGOD9uzM5PEIUB4TaZf-KecQPFFnwmNTvd7GkDEC/exec】"; 
+    // ==========================================
+
     let costChart, netChart, hourChart;
 
     const chartDataLabels = {
@@ -256,6 +263,55 @@
                 solList.appendChild(d);
             }
         });
+    }
+
+    // ==========================================
+    // ▼ 保存・印刷処理の実装 (新規追加)
+    // ==========================================
+    async function handlePrintAndSave() {
+        const btn = document.querySelector('.print-btn');
+        const originalText = btn.innerText;
+
+        // 1. ボタンを「保存中...」に変更
+        btn.innerText = "データを保存しています...";
+        btn.disabled = true;
+
+        // 2. 画面の値を取得してデータを作成
+        const dataToSend = {
+            clientName: document.getElementById('clientNameInput').value || "未入力",
+            tanka: document.getElementById('tanka').options[document.getElementById('tanka').selectedIndex].text,
+            roomCount: document.getElementById('roomCount').value,
+            boothCount: document.getElementById('boothCount').value,
+            employeeCount: document.getElementById('idCount').value,
+            hours: document.getElementById('dispHour').innerText, // "1,200 時間"
+            roi: document.getElementById('roiPercent').innerText + "%", 
+            netSaving: document.getElementById('dispNetSaving').innerText,
+            location: document.getElementById('tanka').value // 単価
+        };
+
+        // 3. Googleスプレッドシート(GAS)へ送信
+        // ※mode: 'no-cors' なので成功レスポンスは見えませんが、送信はされます。
+        try {
+            await fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSend)
+            });
+            console.log("送信リクエスト完了");
+        } catch (error) {
+            console.error("保存エラー:", error);
+            // エラーでもPDF出力は止めない
+        }
+
+        // 4. 少し待ってから印刷画面を開く (保存処理の裏側完了を期待)
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            window.print();
+        }, 1000); // 1秒ウェイト
     }
 
     window.onload = function() {
