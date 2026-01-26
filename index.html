@@ -180,9 +180,9 @@
 
 <script>
     // ==========================================
-    // ▼ GAS連携用URL (設定済み)
+    // ▼ GAS連携用URL (いただいた最新のURLを設定済み)
     // ==========================================
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxMtdpGUi2ONAtUln8ejoXT9mK0DGOD9uzM5PEIUB4TaZf-KecQPFFnwmNTvd7GkDEC/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxb0qlI3rkkVELIqdXYrUQRlJQujf_HI6GOUZt0Wk9X8q8RddrXvJhBboXprTt57CA7/exec";
     // ==========================================
 
     let costChart, netChart, hourChart;
@@ -266,17 +266,15 @@
     }
 
     // ==========================================
-    // ▼ 保存・印刷処理の実装 (完了版)
+    // ▼ 保存・印刷処理 (稼働率対応版)
     // ==========================================
     async function handlePrintAndSave() {
         const btn = document.querySelector('.print-btn');
         const originalText = btn.innerText;
 
-        // 1. ボタンを「保存中...」に変更
         btn.innerText = "データを保存しています...";
         btn.disabled = true;
 
-        // 2. 画面の値を取得してデータを作成
         const dataToSend = {
             clientName: document.getElementById('clientNameInput').value || "未入力",
             tanka: document.getElementById('tanka').options[document.getElementById('tanka').selectedIndex].text,
@@ -286,10 +284,13 @@
             hours: document.getElementById('dispHour').innerText, 
             roi: document.getElementById('roiPercent').innerText + "%", 
             netSaving: document.getElementById('dispNetSaving').innerText,
-            location: document.getElementById('tanka').value 
+            location: document.getElementById('tanka').value,
+            
+            // 稼働率データの送信（J列・K列用）
+            beforeRate: document.getElementById('beforeVal').value + "%", // 現状
+            afterRate: document.getElementById('afterVal').value + "%"    // 目標
         };
 
-        // 3. Googleスプレッドシート(GAS)へ送信
         try {
             await fetch(scriptURL, {
                 method: 'POST',
@@ -302,15 +303,13 @@
             console.log("送信リクエスト完了");
         } catch (error) {
             console.error("保存エラー:", error);
-            // エラーでもPDF出力は止めない
         }
 
-        // 4. 少し待ってから印刷画面を開く (保存処理の裏側完了を期待)
         setTimeout(() => {
             btn.innerText = originalText;
             btn.disabled = false;
             window.print();
-        }, 1000); // 1秒ウェイト
+        }, 1000); 
     }
 
     window.onload = function() {
