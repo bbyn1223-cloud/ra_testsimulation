@@ -180,9 +180,9 @@
 
 <script>
     // ==========================================
-    // ▼ スプレッドシート連携用設定 (ここを書き換えてください)
+    // ▼ GAS連携用URL (設定済み)
     // ==========================================
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxMtdpGUi2ONAtUln8ejoXT9mK0DGOD9uzM5PEIUB4TaZf-KecQPFFnwmNTvd7GkDEC/exec"; 
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxMtdpGUi2ONAtUln8ejoXT9mK0DGOD9uzM5PEIUB4TaZf-KecQPFFnwmNTvd7GkDEC/exec";
     // ==========================================
 
     let costChart, netChart, hourChart;
@@ -266,7 +266,7 @@
     }
 
     // ==========================================
-    // ▼ 保存・印刷処理の実装 (新規追加)
+    // ▼ 保存・印刷処理の実装 (完了版)
     // ==========================================
     async function handlePrintAndSave() {
         const btn = document.querySelector('.print-btn');
@@ -283,14 +283,13 @@
             roomCount: document.getElementById('roomCount').value,
             boothCount: document.getElementById('boothCount').value,
             employeeCount: document.getElementById('idCount').value,
-            hours: document.getElementById('dispHour').innerText, // "1,200 時間"
+            hours: document.getElementById('dispHour').innerText, 
             roi: document.getElementById('roiPercent').innerText + "%", 
             netSaving: document.getElementById('dispNetSaving').innerText,
-            location: document.getElementById('tanka').value // 単価
+            location: document.getElementById('tanka').value 
         };
 
         // 3. Googleスプレッドシート(GAS)へ送信
-        // ※mode: 'no-cors' なので成功レスポンスは見えませんが、送信はされます。
         try {
             await fetch(scriptURL, {
                 method: 'POST',
@@ -345,4 +344,3 @@
 </script>
 </body>
 </html>
-
