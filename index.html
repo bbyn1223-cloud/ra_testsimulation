@@ -41,7 +41,30 @@
             z-index: 10;
         }
         .app-title { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
-        .user-info { font-size: 13px; opacity: 0.8; }
+        
+        /* ユーザー情報とログアウトボタンのラッパー */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info { font-size: 13px; opacity: 0.9; }
+        
+        /* ログアウトボタン */
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
 
         /* --- メインレイアウト --- */
         .main-wrapper {
@@ -178,11 +201,15 @@
                 zoom: 80%; /* スライドとして1枚に収めるための縮小率 */
             }
             
-            /* 不要なUI要素を非表示 */
-            .print-btn, #loginOverlay, .user-info, input[type="range"] { 
+            /* 不要なUI要素を非表示（ヘッダー全体ではなく、中の要素を制御） */
+            .print-btn, #loginOverlay, input[type="range"] { 
                 display: none !important; 
             }
             .no-print-section { display: none !important; }
+
+            /* ログアウトボタンも印刷時は隠す */
+            .logout-btn { display: none !important; }
+            .user-info { display: none !important; }
 
             /* レイアウト：画面と同じ左右分割を強制 */
             .main-wrapper { 
@@ -200,6 +227,10 @@
                 color: white !important;
                 margin-bottom: 15px;
                 border-bottom: none;
+                justify-content: center; /* タイトルを中央へ */
+            }
+            .app-title {
+                font-size: 24px; /* タイトルを少し大きく */
             }
             
             /* --- 左パネル（条件エリア） --- */
@@ -298,7 +329,10 @@
 
 <header class="app-header">
     <div class="app-title">OFFICE OPTIMIZATION DASHBOARD</div>
-    <div class="user-info">Login User: <span id="headerUserName" style="font-weight:bold;">Guest</span></div>
+    <div class="header-right">
+        <div class="user-info">Login User: <span id="headerUserName" style="font-weight:bold;">Guest</span></div>
+        <button onclick="logout()" class="logout-btn">ログアウト</button>
+    </div>
 </header>
 
 <div class="main-wrapper">
@@ -434,7 +468,6 @@
     // ==========================================
     // ▼ 設定エリア
     // ==========================================
-    // 修正: 通信エラー解消済みのURL
     const scriptURL = "https://script.google.com/macros/s/AKfycby9qhaxmrnlF3LYA3vuoI0RPYFHwbTasdwL5bvibaNH7WkKHU56j1FxwYKtfUzCI2I4/exec";
     // ==========================================
 
@@ -449,12 +482,21 @@
         document.getElementById('dispAfter').innerText = a + "%";
     }
 
+    // --- ログアウト処理 ---
+    function logout() {
+        // セッションストレージをクリア
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('userName');
+        sessionStorage.removeItem('userId');
+        // ページをリロードしてログイン画面に戻す
+        location.reload();
+    }
+
     async function executeLogin() {
         const idInput = document.getElementById('idInput').value;
         const btn = document.getElementById('loginBtn');
         const errorMsg = document.getElementById('loginError');
 
-        // 修正: 入力がない場合はエラーを表示
         if(!idInput) {
             errorMsg.innerText = "IDを入力してください";
             errorMsg.style.display = 'block';
@@ -500,13 +542,11 @@
         }
         document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ja-JP');
         
-        // チャート初期化 (万が一のエラー回避)
         try {
             initCharts();
         } catch(e) {
             console.error("Chart init error:", e);
         }
-        
         calc();
     });
 
@@ -521,7 +561,6 @@
             ctx.textBaseline = 'bottom';
             data.datasets[0].data.forEach((value, index) => {
                 const { x, y } = chart.getDatasetMeta(0).data[index];
-                // nullチェック
                 if(x && y) {
                     let label = value.toLocaleString();
                     ctx.fillText(label, x, y - 2);
