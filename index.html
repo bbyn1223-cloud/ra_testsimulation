@@ -161,96 +161,134 @@
 
 
         /* =========================================
-           ▼ 印刷設定 (横向き・左右分割維持)
+           ▼ 印刷設定 (スライド用・横向き・1枚収め)
            ========================================= */
         @media print {
-            /* 用紙設定：A4横 */
-            @page { size: A4 landscape; margin: 5mm; } 
+            @page { 
+                size: A4 landscape; /* 横向き */
+                margin: 5mm; 
+            }
             
             body { 
-                height: auto; 
-                overflow: visible; 
+                height: 100%; 
+                width: 100%;
+                overflow: hidden; 
                 background: white; 
                 -webkit-print-color-adjust: exact; 
-                font-size: 10px; /* 全体の文字を少し小さくして収める */
-                zoom: 90%; /* 全体を縮小してA4に収める */
+                zoom: 80%; /* スライドとして1枚に収めるための縮小率 */
             }
             
-            /* ヘッダー・ボタン・不要な要素を消す */
-            .app-header, .print-btn, #loginOverlay { display: none !important; }
-            .no-print-section { display: none !important; } /* 運用課題セクションを隠す場合はそのまま */
+            /* 不要なUI要素を非表示 */
+            .print-btn, #loginOverlay, .user-info, input[type="range"] { 
+                display: none !important; 
+            }
+            .no-print-section { display: none !important; } /* 課題リストを隠してスペース確保 */
 
-            /* レイアウト：Flexboxを維持して左右に並べる */
+            /* レイアウト：画面と同じ左右分割を強制 */
             .main-wrapper { 
                 display: flex !important;
-                flex-direction: row !important; /* 横並び強制 */
+                flex-direction: row !important;
                 height: auto !important;
-                gap: 15px;
-            }
-            
-            /* --- 左パネル（条件表示） --- */
-            .left-panel { 
-                width: 280px !important; /* 固定幅 */
-                flex-shrink: 0 !important;
-                border-right: 1px solid #ccc !important;
-                padding: 10px !important;
-                display: block !important;
-                background: white !important;
-                box-shadow: none !important;
-                overflow: visible !important;
+                gap: 20px;
             }
 
-            /* スライダー本体は印刷時には邪魔なので隠し、数字を目立たせる */
-            input[type="range"] { display: none !important; }
-            .input-group { margin-bottom: 8px; page-break-inside: avoid; }
-            .input-group label { margin-bottom: 2px; color: #333; }
+            /* --- ヘッダー（スライドタイトル風） --- */
+            .app-header {
+                position: static;
+                height: 50px;
+                background: var(--navy) !important;
+                color: white !important;
+                margin-bottom: 15px;
+                border-bottom: none;
+            }
             
-            /* 入力ボックスの枠線を消して「テキスト」っぽく見せる */
-            input[type="number"], select { 
+            /* --- 左パネル（条件エリア） --- */
+            /* ここを「設定条件ボックス」のように見せる */
+            .left-panel { 
+                width: 300px !important; 
+                flex-shrink: 0;
+                border: 2px solid var(--navy) !important; /* 枠線で囲む */
+                background: #f8f9fa !important;
+                padding: 15px !important;
+                display: block !important;
+                border-radius: 8px;
+            }
+            
+            /* 入力フォームを「テキスト」として見せる加工 */
+            .input-group { 
+                margin-bottom: 12px; 
+                border-bottom: 1px dotted #ccc; 
+                padding-bottom: 4px;
+            }
+            .input-group label { margin-bottom: 0; color: #555; font-size: 11px; }
+            
+            /* 入力ボックスの枠線を消す */
+            input[type="number"], select, input[type="text"] { 
                 border: none !important; 
                 background: transparent !important; 
                 font-weight: bold; 
+                font-size: 14px;
                 text-align: right;
                 padding: 0;
-                width: auto;
+                box-shadow: none;
+                appearance: none; /* プルダウンの矢印を消す */
+                -webkit-appearance: none;
             }
-            /* 単位などは右寄せのまま */
-            .num-wrap { justify-content: flex-end; border-bottom: 1px dotted #ccc; padding-bottom: 2px;}
+            /* 単位表示の調整 */
+            .num-wrap { justify-content: flex-end; }
+            
+            /* クライアント名を大きく */
+            #clientNameInput {
+                text-align: left;
+                font-size: 22px !important;
+                color: var(--navy);
+                border-bottom: 2px solid var(--accent-red) !important;
+                margin-bottom: 20px;
+            }
 
-            /* --- 右パネル（結果表示） --- */
+            /* --- 右パネル（結果エリア） --- */
             .right-panel { 
                 flex-grow: 1 !important;
                 padding: 0 !important; 
-                overflow: visible !important; 
-                background: white !important; 
+                background: white !important;
+                border: none;
+                overflow: visible !important;
             }
             
             /* KPIカード */
             .kpi-grid { 
                 grid-template-columns: 1fr 1fr 1fr; 
-                gap: 10px; 
-                margin-bottom: 15px; 
-                padding: 5px;
-                border: 1px solid #eee;
+                gap: 15px; 
+                margin-bottom: 20px; 
             }
-            .kpi-card { padding: 8px; border: none; box-shadow: none; background: #f9f9f9; }
-            .kpi-value { font-size: 20px; }
-            .roi-badge { position: static; display: inline-block; margin-bottom: 5px; font-size: 10px;}
+            .kpi-card {
+                padding: 10px; 
+                border: 1px solid #ddd;
+                box-shadow: none;
+                background: white;
+            }
+            .kpi-value { font-size: 24px; }
 
             /* チャート */
             .charts-container { 
                 grid-template-columns: 1fr 1fr 1fr; 
-                gap: 10px; 
-                margin-bottom: 15px; 
+                gap: 15px; 
+                margin-bottom: 20px; 
             }
-            .chart-box { height: 180px; padding: 5px; border: 1px solid #eee; }
-            .canvas-wrapper { height: 150px; }
-            .chart-title { font-size: 10px; margin-bottom: 2px; }
+            .chart-box { 
+                height: 200px; 
+                padding: 10px; 
+                border: 1px solid #ddd; 
+            }
+            .canvas-wrapper { height: 160px; }
 
             /* 効果レポート */
-            .panel-card { box-shadow: none; padding: 10px; border: 1px solid #eee; }
-            .sol-item { margin-bottom: 5px; padding-bottom: 5px; font-size: 9px; }
-            h2 { font-size: 12px; margin-bottom: 8px; border-left-width: 3px; }
+            .panel-card { 
+                box-shadow: none; 
+                border: 1px solid #ddd; 
+                padding: 15px;
+            }
+            .sol-item { font-size: 11px; }
         }
     </style>
 </head>
@@ -275,7 +313,7 @@
     
     <div class="left-panel">
         <div style="grid-column: 1 / -1;">
-            <label>対象クライアント名</label>
+            <label class="no-print-section">対象クライアント名</label>
             <input type="text" id="clientNameInput" placeholder="貴社名を入力" style="font-weight:bold; font-size:16px;">
         </div>
 
@@ -477,4 +515,138 @@
             ctx.textBaseline = 'bottom';
             data.datasets[0].data.forEach((value, index) => {
                 const { x, y } = chart.getDatasetMeta(0).data[index];
-                let label
+                let label = value.toLocaleString();
+                ctx.fillText(label, x, y - 2);
+            });
+        }
+    };
+
+    function initCharts() {
+        const commonOpt = { 
+            responsive: true, maintainAspectRatio: false, 
+            plugins: { legend: { display: false } }, 
+            scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } 
+        };
+        
+        costChart = new Chart(document.getElementById('costChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['利用料', '創出価値'], datasets: [{ data: [0, 0], backgroundColor: ['#1f3864', '#0070c0'], borderRadius: 4, barThickness: 30 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+
+        netChart = new Chart(document.getElementById('netChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['正味の回収額'], datasets: [{ data: [0], backgroundColor: ['#0070c0'], borderRadius: 4, barThickness: 30 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+
+        hourChart = new Chart(document.getElementById('hourChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['導入前', '目標値'], datasets: [{ data: [0, 0], backgroundColor: ['#d1d5db', '#1f3864'], borderRadius: 4, barThickness: 30 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+    }
+
+    function calc() {
+        const tanka = parseInt(document.getElementById('tanka').value) || 0;
+        const rooms = parseInt(document.getElementById('roomCount').value) || 0;
+        const booths = parseInt(document.getElementById('boothCount').value) || 0;
+        const ids = parseInt(document.getElementById('idCount').value) || 0;
+        const bRate = parseInt(document.getElementById('beforeVal').value) / 100;
+        const aRate = parseInt(document.getElementById('afterVal').value) / 100;
+
+        const areaT = (rooms * 4) + (booths * 0.5);
+        const officeCost = tanka * areaT;
+        const toolCost = ids * 450;
+        const diffRate = Math.max(0, aRate - bRate);
+        const grossSaving = officeCost * diffRate;
+        const netSaving = grossSaving - toolCost;
+        const roi = toolCost > 0 ? Math.round((grossSaving / toolCost) * 100) : 0;
+
+        const totalMaxHours = (rooms + booths) * 8 * 20;
+        const hBefore = Math.floor(totalMaxHours * bRate);
+        const hAfter = Math.floor(totalMaxHours * aRate);
+        const hDiff = hAfter - hBefore;
+
+        document.getElementById('dispTotalOffice').innerText = officeCost.toLocaleString();
+        document.getElementById('dispNetSaving').innerText = netSaving.toLocaleString();
+        document.getElementById('dispGrossSaving').innerText = grossSaving.toLocaleString();
+        document.getElementById('dispHour').innerText = hDiff.toLocaleString();
+        document.getElementById('roiPercent').innerText = roi.toLocaleString();
+
+        if(costChart) {
+            costChart.data.datasets[0].data = [toolCost, grossSaving];
+            costChart.update();
+        }
+        if(netChart) {
+            netChart.data.datasets[0].data = [netSaving];
+            netChart.data.datasets[0].backgroundColor = [netSaving >= 0 ? '#c00000' : '#888']; 
+            if(netSaving > 0) netChart.data.datasets[0].backgroundColor = ['#c00000']; 
+            netChart.update();
+        }
+        if(hourChart) {
+            hourChart.data.datasets[0].data = [hBefore, hAfter];
+            hourChart.update();
+        }
+
+        const checks = document.querySelectorAll('.task-check');
+        const solList = document.getElementById('solList');
+        solList.innerHTML = '';
+        const dynamicMessages = [
+            { title: "面積資産の活用価値を最大化", text: `現状の稼働率から${Math.round(aRate*100)}%への最適化により、月間約${grossSaving.toLocaleString()}円相当の「新しい価値」をオフィスから創出します。` },
+            { title: "個室・ブースの回転率向上", text: `${booths}台のブース利用を効率化。WEB会議の急増によるブース不足を、Reserve Any の予約集約アルゴリズムで解消します。` },
+            { title: `月間${hDiff}時間の会議枠を創出`, text: `増床コストなしで、月間${hDiff}時間分の活動スペースを実質的に生み出します。これは会議室${(hDiff/160).toFixed(1)}室分を増設するのと同等の価値です。` },
+            { title: "客観的データに基づく適正化", text: `月間${officeCost.toLocaleString()}円の維持費に対し、Reserve Any のデータを活用して無駄のない拠点運営を実現。将来的な賃料ロスを未然に防ぎます。` }
+        ];
+        checks.forEach((c, i) => {
+            if(c.checked) {
+                const d = document.createElement('div');
+                d.className = 'sol-item';
+                d.innerHTML = `<span class="sol-title">${dynamicMessages[i].title}</span>${dynamicMessages[i].text}`;
+                solList.appendChild(d);
+            }
+        });
+    }
+
+    async function handlePrintAndSave() {
+        const btn = document.querySelector('.print-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "保存中...";
+        btn.disabled = true;
+
+        const dataToSend = {
+            userId: sessionStorage.getItem('userId') || '不明',
+            userName: sessionStorage.getItem('userName') || '不明',
+            clientName: document.getElementById('clientNameInput').value || "未入力",
+            tanka: document.getElementById('tanka').options[document.getElementById('tanka').selectedIndex].text,
+            roomCount: document.getElementById('roomCount').value,
+            boothCount: document.getElementById('boothCount').value,
+            employeeCount: document.getElementById('idCount').value,
+            hours: document.getElementById('dispHour').innerText, 
+            roi: document.getElementById('roiPercent').innerText + "%", 
+            netSaving: document.getElementById('dispNetSaving').innerText,
+            location: document.getElementById('tanka').value,
+            beforeRate: document.getElementById('beforeVal').value + "%", 
+            afterRate: document.getElementById('afterVal').value + "%"
+        };
+
+        try {
+            await fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSend)
+            });
+        } catch (error) {
+            console.error("保存エラー:", error);
+        }
+
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            window.print();
+        }, 1000); 
+    }
+</script>
+</body>
+</html>
