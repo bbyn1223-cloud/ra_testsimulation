@@ -25,7 +25,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* スクロールは各パネル内で行う */
+            overflow: hidden; 
         }
 
         /* --- ヘッダー --- */
@@ -43,34 +43,34 @@
         .app-title { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
         .user-info { font-size: 13px; opacity: 0.8; }
 
-        /* --- メインレイアウト (左右分割) --- */
+        /* --- メインレイアウト --- */
         .main-wrapper {
             display: flex;
             height: calc(100vh - 60px);
         }
 
-        /* 左パネル (入力エリア) */
+        /* 左パネル */
         .left-panel {
             width: 380px;
             background: white;
             border-right: 1px solid var(--border-color);
             padding: 20px;
-            overflow-y: auto; /* 縦スクロール */
+            overflow-y: auto;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* 右パネル (結果エリア) */
+        /* 右パネル */
         .right-panel {
             flex-grow: 1;
             padding: 20px;
-            overflow-y: auto; /* 縦スクロール */
+            overflow-y: auto;
             background: var(--light-gray);
         }
 
-        /* --- コンポーネントスタイル --- */
+        /* --- 共通スタイル --- */
         h2 { font-size: 15px; color: var(--navy); border-left: 4px solid var(--navy); padding-left: 10px; margin: 0 0 15px 0; }
         
         .panel-card {
@@ -93,13 +93,11 @@
         .num-wrap { display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
         .num-wrap input { width: 80px; text-align: right; }
 
-        /* 課題リスト */
         .task-list { background: var(--gold-bg); padding: 10px; border: 1px solid #e0d8b0; border-radius: 6px; }
         .task-item { display: flex; margin-bottom: 8px; font-size: 12px; cursor: pointer; }
-        .task-item:last-child { margin-bottom: 0; }
         .task-item input { margin-right: 8px; margin-top: 2px; }
 
-        /* 結果グリッド */
+        /* KPIグリッド */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -133,9 +131,8 @@
         .chart-title { font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #555; }
         .canvas-wrapper { height: 200px; position: relative; }
 
-        /* ソリューションリスト */
         .sol-item {
-            font-size: 13px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee;
+            font-size: 13px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #eee;
             line-height: 1.5;
         }
         .sol-title { color: var(--navy); font-weight: bold; display: block; margin-bottom: 4px; }
@@ -162,40 +159,68 @@
         .login-btn { background: var(--accent-red); color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
 
-        /* --- 印刷設定 (ここでA4レポートレイアウトに戻す) --- */
+
+        /* =========================================
+           ▼ 印刷設定 (A4・1枚収め設定)
+           ========================================= */
         @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            body { height: auto; overflow: visible; background: white; -webkit-print-color-adjust: exact; }
-            .app-header, .print-btn, .user-info, input[type="range"] { display: none !important; }
-            
-            /* レイアウトのリセット */
-            .main-wrapper { display: block; height: auto; }
-            .left-panel, .right-panel { 
-                width: 100%; border: none; padding: 0; margin: 0; overflow: visible; background: white; 
+            @page { size: A4 portrait; margin: 8mm; } /* 余白を少し狭く */
+            body { 
+                height: auto; overflow: visible; background: white; 
+                -webkit-print-color-adjust: exact; 
+                font-size: 11px; /* 全体の文字を少し小さく */
             }
-            .panel-card { box-shadow: none; padding: 0; margin-bottom: 30px; }
             
-            /* 入力値の表示調整 */
-            .input-group { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-            .input-group label { margin: 0; font-size: 11px; }
-            .input-group input, .input-group select { border: none; text-align: right; width: auto; font-weight: bold; padding: 0; }
+            /* 不要な要素を消す */
+            .app-header, .print-btn, .user-info, input[type="range"] { display: none !important; }
+            .no-print-section { display: none !important; } /* Phase1を消すクラス */
+
+            /* レイアウトのリセットと1枚収め調整 */
+            .main-wrapper { display: block; height: auto; }
+            
+            /* 入力条件(左パネル)を上部にコンパクト表示 */
+            .left-panel { 
+                width: 100%; border-bottom: 2px solid var(--navy); padding: 0 0 10px 0; margin-bottom: 15px; 
+                background: white; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;
+                border-right: none;
+            }
+            
+            /* 入力項目の見た目をテキスト化 */
+            .input-group { margin-bottom: 2px; padding: 0; border: none; display: flex; align-items: center; justify-content: space-between; }
+            .input-group label { margin: 0; font-size: 10px; color: #666; }
+            .input-group input, .input-group select { 
+                border: none; text-align: right; width: auto; font-weight: bold; padding: 0; height: auto; font-size: 11px;
+            }
             .num-wrap input { width: auto; }
+            
+            /* クライアント名とタイトル */
+            #clientNameInput { font-size: 20px; border: none; font-weight: bold; margin-bottom: 10px; width: 100%; }
+            h2 { font-size: 12px; margin: 0 0 5px 0; border-left: 3px solid var(--navy); padding-left: 6px; }
+            section { break-inside: avoid; }
 
-            .charts-container { grid-template-columns: 1fr 1fr; }
-            .kpi-grid { grid-template-columns: 1fr 1fr 1fr; margin-bottom: 30px; border: 2px solid var(--navy); padding: 15px; border-radius: 8px; }
-            .kpi-card { border: none; background: transparent; padding: 0; text-align: left; }
-            .roi-badge { position: static; display: inline-block; margin-bottom: 10px; }
+            /* 右パネル(結果)の設定 */
+            .right-panel { width: 100%; padding: 0; overflow: visible; background: white; }
+            
+            /* KPIカードを横一列に圧縮 */
+            .kpi-grid { 
+                grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; 
+                border: 1px solid #ddd; padding: 10px; border-radius: 6px;
+            }
+            .kpi-card { padding: 5px; border: none; text-align: left; }
+            .kpi-value { font-size: 18px; }
+            .roi-badge { position: static; display: inline-block; padding: 2px 8px; font-size: 10px; margin-bottom: 4px; }
 
-            /* 改ページ制御 */
-            h2 { font-size: 14px; margin-top: 20px; }
-            .solution-section { break-before: page; page-break-before: always; padding-top: 20px; }
-        }
+            /* グラフの高さを低くして1枚に入れる */
+            .charts-container { 
+                grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; 
+            }
+            .chart-box { height: 160px; padding: 5px; border: none; } /* 枠線を消してスッキリさせる */
+            .canvas-wrapper { height: 130px; }
+            .chart-title { font-size: 10px; margin-bottom: 2px; }
 
-        /* レスポンシブ (タブレット・スマホ) */
-        @media (max-width: 900px) {
-            .main-wrapper { flex-direction: column; overflow-y: auto; }
-            .left-panel, .right-panel { width: 100%; height: auto; overflow: visible; }
-            body { height: auto; overflow-y: auto; }
+            /* ソリューションリスト */
+            .panel-card { box-shadow: none; padding: 0; margin: 0; border: none; }
+            .sol-item { margin-bottom: 8px; padding-bottom: 4px; font-size: 10px; }
         }
     </style>
 </head>
@@ -219,12 +244,12 @@
 <div class="main-wrapper">
     
     <div class="left-panel">
-        <div>
-            <label>対象クライアント名</label>
+        <div style="grid-column: 1 / -1;">
+            <label class="no-print-section">対象クライアント名</label>
             <input type="text" id="clientNameInput" placeholder="貴社名を入力" style="font-weight:bold; font-size:16px;">
         </div>
 
-        <section>
+        <section class="no-print-section">
             <h2>01. 運用課題</h2>
             <div class="task-list">
                 <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()" checked><span>【ミスマッチ】広い会議室を少人数で利用</span></label>
@@ -235,7 +260,7 @@
         </section>
 
         <section>
-            <h2>02. 条件シミュレーション</h2>
+            <h2>02. 算出前提条件</h2>
             
             <div class="input-group">
                 <label>エリア単価 (円/坪)</label>
@@ -273,20 +298,20 @@
                 <input type="range" id="idSlide" min="10" max="1000" step="10" value="100" oninput="idCount.value=this.value; calc()">
             </div>
 
-            <div class="input-group" style="background:#f0f7ff; padding:10px; border-radius:6px;">
-                <label style="color:var(--creation-blue);">稼働率改善 (現在 → 目標)</label>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px;">
-                    <span>現在: <strong id="dispBefore">60%</strong></span>
-                    <span>目標: <strong id="dispAfter">75%</strong></span>
+            <div class="input-group">
+                <label>稼働率改善 (現在→目標)</label>
+                <div class="num-wrap">
+                   <span style="font-size:12px; font-weight:bold;"><span id="dispBefore">60%</span> → <span id="dispAfter">75%</span></span>
                 </div>
                 <input type="range" id="beforeSlide" min="10" max="90" value="60" oninput="updateRateLabel(); calc()">
                 <input type="range" id="afterSlide" min="10" max="100" value="75" oninput="updateRateLabel(); calc()">
                 <input type="hidden" id="beforeVal" value="60">
                 <input type="hidden" id="afterVal" value="75">
             </div>
-
-            <div style="font-size:12px; text-align:center; color:#666; margin-top:10px;">
-                月間資産維持費: <strong id="dispTotalOffice">0</strong> 円
+            
+            <div class="input-group" style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;">
+                 <label>月間資産維持費</label>
+                 <strong><span id="dispTotalOffice">0</span> 円</strong>
             </div>
         </section>
         
@@ -316,15 +341,15 @@
 
         <div class="charts-container">
             <div class="chart-box">
-                <div class="chart-title">費用対効果 (コスト vs 創出価値)</div>
+                <div class="chart-title">費用対効果</div>
                 <div class="canvas-wrapper"><canvas id="costChart"></canvas></div>
             </div>
             <div class="chart-box">
-                <div class="chart-title">月間収支 (ネットメリット)</div>
+                <div class="chart-title">月間収支</div>
                 <div class="canvas-wrapper"><canvas id="netChart"></canvas></div>
             </div>
             <div class="chart-box">
-                <div class="chart-title">有効時間の増加シミュレーション</div>
+                <div class="chart-title">有効時間の増加</div>
                 <div class="canvas-wrapper"><canvas id="hourChart"></canvas></div>
             </div>
         </div>
@@ -411,15 +436,15 @@
         afterDatasetsDraw(chart) {
             const { ctx, data } = chart;
             ctx.save();
-            ctx.font = 'bold 11px sans-serif';
+            ctx.font = 'bold 10px sans-serif';
             ctx.fillStyle = '#333';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             data.datasets[0].data.forEach((value, index) => {
-                const { x, y, width } = chart.getDatasetMeta(0).data[index];
+                const { x, y } = chart.getDatasetMeta(0).data[index];
                 let label = value.toLocaleString();
-                // 縦棒グラフに変更したため位置調整
-                ctx.fillText(label, x, y - 5);
+                // 印刷時に見切れないよう位置調整
+                ctx.fillText(label, x, y - 2);
             });
         }
     };
@@ -432,20 +457,20 @@
         };
         
         costChart = new Chart(document.getElementById('costChart').getContext('2d'), {
-            type: 'bar', // 縦棒グラフに変更
-            data: { labels: ['利用料', '創出価値'], datasets: [{ data: [0, 0], backgroundColor: ['#1f3864', '#0070c0'], borderRadius: 4, barThickness: 40 }] },
+            type: 'bar',
+            data: { labels: ['利用料', '創出価値'], datasets: [{ data: [0, 0], backgroundColor: ['#1f3864', '#0070c0'], borderRadius: 4, barThickness: 30 }] },
             options: commonOpt, plugins: [chartDataLabels]
         });
 
         netChart = new Chart(document.getElementById('netChart').getContext('2d'), {
             type: 'bar',
-            data: { labels: ['正味の回収額'], datasets: [{ data: [0], backgroundColor: ['#0070c0'], borderRadius: 4, barThickness: 40 }] },
+            data: { labels: ['正味の回収額'], datasets: [{ data: [0], backgroundColor: ['#0070c0'], borderRadius: 4, barThickness: 30 }] },
             options: commonOpt, plugins: [chartDataLabels]
         });
 
         hourChart = new Chart(document.getElementById('hourChart').getContext('2d'), {
             type: 'bar',
-            data: { labels: ['導入前', '目標値'], datasets: [{ data: [0, 0], backgroundColor: ['#d1d5db', '#1f3864'], borderRadius: 4, barThickness: 40 }] },
+            data: { labels: ['導入前', '目標値'], datasets: [{ data: [0, 0], backgroundColor: ['#d1d5db', '#1f3864'], borderRadius: 4, barThickness: 30 }] },
             options: commonOpt, plugins: [chartDataLabels]
         });
     }
@@ -483,7 +508,7 @@
         }
         if(netChart) {
             netChart.data.datasets[0].data = [netSaving];
-            netChart.data.datasets[0].backgroundColor = [netSaving >= 0 ? '#c00000' : '#888']; // プラスなら赤(強調)、マイナスならグレー
+            netChart.data.datasets[0].backgroundColor = [netSaving >= 0 ? '#c00000' : '#888']; 
             if(netSaving > 0) netChart.data.datasets[0].backgroundColor = ['#c00000']; 
             netChart.update();
         }
@@ -514,7 +539,6 @@
     async function handlePrintAndSave() {
         const btn = document.querySelector('.print-btn');
         const originalText = btn.innerText;
-
         btn.innerText = "保存中...";
         btn.disabled = true;
 
