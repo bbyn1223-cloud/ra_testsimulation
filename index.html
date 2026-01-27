@@ -161,134 +161,96 @@
 
 
         /* =========================================
-           ▼ 印刷設定 (スライド用・横向き・1枚収め)
+           ▼ 印刷設定 (横向き・左右分割維持)
            ========================================= */
         @media print {
-            @page { 
-                size: A4 landscape; /* 横向き */
-                margin: 5mm; 
-            }
+            /* 用紙設定：A4横 */
+            @page { size: A4 landscape; margin: 5mm; } 
             
             body { 
-                height: 100%; 
-                width: 100%;
-                overflow: hidden; 
+                height: auto; 
+                overflow: visible; 
                 background: white; 
                 -webkit-print-color-adjust: exact; 
-                zoom: 80%; /* スライドとして1枚に収めるための縮小率 */
+                font-size: 10px; /* 全体の文字を少し小さくして収める */
+                zoom: 90%; /* 全体を縮小してA4に収める */
             }
             
-            /* 不要なUI要素を非表示 */
-            .print-btn, #loginOverlay, .user-info, input[type="range"] { 
-                display: none !important; 
-            }
-            .no-print-section { display: none !important; } /* 課題リストを隠してスペース確保 */
+            /* ヘッダー・ボタン・不要な要素を消す */
+            .app-header, .print-btn, #loginOverlay { display: none !important; }
+            .no-print-section { display: none !important; } /* 運用課題セクションを隠す場合はそのまま */
 
-            /* レイアウト：画面と同じ左右分割を強制 */
+            /* レイアウト：Flexboxを維持して左右に並べる */
             .main-wrapper { 
                 display: flex !important;
-                flex-direction: row !important;
+                flex-direction: row !important; /* 横並び強制 */
                 height: auto !important;
-                gap: 20px;
+                gap: 15px;
+            }
+            
+            /* --- 左パネル（条件表示） --- */
+            .left-panel { 
+                width: 280px !important; /* 固定幅 */
+                flex-shrink: 0 !important;
+                border-right: 1px solid #ccc !important;
+                padding: 10px !important;
+                display: block !important;
+                background: white !important;
+                box-shadow: none !important;
+                overflow: visible !important;
             }
 
-            /* --- ヘッダー（スライドタイトル風） --- */
-            .app-header {
-                position: static;
-                height: 50px;
-                background: var(--navy) !important;
-                color: white !important;
-                margin-bottom: 15px;
-                border-bottom: none;
-            }
+            /* スライダー本体は印刷時には邪魔なので隠し、数字を目立たせる */
+            input[type="range"] { display: none !important; }
+            .input-group { margin-bottom: 8px; page-break-inside: avoid; }
+            .input-group label { margin-bottom: 2px; color: #333; }
             
-            /* --- 左パネル（条件エリア） --- */
-            /* ここを「設定条件ボックス」のように見せる */
-            .left-panel { 
-                width: 300px !important; 
-                flex-shrink: 0;
-                border: 2px solid var(--navy) !important; /* 枠線で囲む */
-                background: #f8f9fa !important;
-                padding: 15px !important;
-                display: block !important;
-                border-radius: 8px;
-            }
-            
-            /* 入力フォームを「テキスト」として見せる加工 */
-            .input-group { 
-                margin-bottom: 12px; 
-                border-bottom: 1px dotted #ccc; 
-                padding-bottom: 4px;
-            }
-            .input-group label { margin-bottom: 0; color: #555; font-size: 11px; }
-            
-            /* 入力ボックスの枠線を消す */
-            input[type="number"], select, input[type="text"] { 
+            /* 入力ボックスの枠線を消して「テキスト」っぽく見せる */
+            input[type="number"], select { 
                 border: none !important; 
                 background: transparent !important; 
                 font-weight: bold; 
-                font-size: 14px;
                 text-align: right;
                 padding: 0;
-                box-shadow: none;
-                appearance: none; /* プルダウンの矢印を消す */
-                -webkit-appearance: none;
+                width: auto;
             }
-            /* 単位表示の調整 */
-            .num-wrap { justify-content: flex-end; }
-            
-            /* クライアント名を大きく */
-            #clientNameInput {
-                text-align: left;
-                font-size: 22px !important;
-                color: var(--navy);
-                border-bottom: 2px solid var(--accent-red) !important;
-                margin-bottom: 20px;
-            }
+            /* 単位などは右寄せのまま */
+            .num-wrap { justify-content: flex-end; border-bottom: 1px dotted #ccc; padding-bottom: 2px;}
 
-            /* --- 右パネル（結果エリア） --- */
+            /* --- 右パネル（結果表示） --- */
             .right-panel { 
                 flex-grow: 1 !important;
                 padding: 0 !important; 
-                background: white !important;
-                border: none;
-                overflow: visible !important;
+                overflow: visible !important; 
+                background: white !important; 
             }
             
             /* KPIカード */
             .kpi-grid { 
                 grid-template-columns: 1fr 1fr 1fr; 
-                gap: 15px; 
-                margin-bottom: 20px; 
+                gap: 10px; 
+                margin-bottom: 15px; 
+                padding: 5px;
+                border: 1px solid #eee;
             }
-            .kpi-card {
-                padding: 10px; 
-                border: 1px solid #ddd;
-                box-shadow: none;
-                background: white;
-            }
-            .kpi-value { font-size: 24px; }
+            .kpi-card { padding: 8px; border: none; box-shadow: none; background: #f9f9f9; }
+            .kpi-value { font-size: 20px; }
+            .roi-badge { position: static; display: inline-block; margin-bottom: 5px; font-size: 10px;}
 
             /* チャート */
             .charts-container { 
                 grid-template-columns: 1fr 1fr 1fr; 
-                gap: 15px; 
-                margin-bottom: 20px; 
+                gap: 10px; 
+                margin-bottom: 15px; 
             }
-            .chart-box { 
-                height: 200px; 
-                padding: 10px; 
-                border: 1px solid #ddd; 
-            }
-            .canvas-wrapper { height: 160px; }
+            .chart-box { height: 180px; padding: 5px; border: 1px solid #eee; }
+            .canvas-wrapper { height: 150px; }
+            .chart-title { font-size: 10px; margin-bottom: 2px; }
 
             /* 効果レポート */
-            .panel-card { 
-                box-shadow: none; 
-                border: 1px solid #ddd; 
-                padding: 15px;
-            }
-            .sol-item { font-size: 11px; }
+            .panel-card { box-shadow: none; padding: 10px; border: 1px solid #eee; }
+            .sol-item { margin-bottom: 5px; padding-bottom: 5px; font-size: 9px; }
+            h2 { font-size: 12px; margin-bottom: 8px; border-left-width: 3px; }
         }
     </style>
 </head>
@@ -313,7 +275,7 @@
     
     <div class="left-panel">
         <div style="grid-column: 1 / -1;">
-            <label class="no-print-section">対象クライアント名</label>
+            <label>対象クライアント名</label>
             <input type="text" id="clientNameInput" placeholder="貴社名を入力" style="font-weight:bold; font-size:16px;">
         </div>
 
