@@ -69,22 +69,28 @@
         .login-box h3 { margin-top: 0; color: #1f3864; }
         .login-input {
             width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ccc;
-            border-radius: 4px; box-sizing: border-box; font-size: 16px;
+            border-radius: 4px; box-sizing: border-box; font-size: 16px; text-align: center;
         }
         .login-btn {
             background: #c00000; color: white; border: none; padding: 10px 20px;
-            border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: opacity 0.3s;
         }
+        .login-btn:disabled { opacity: 0.6; cursor: wait; }
         .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
+        
+        /* ログイン後に誰が使っているか表示するエリア */
+        .user-display {
+            position: absolute; top: 10px; right: 20px; color: white; font-size: 12px; opacity: 0.8;
+        }
         /* ▲▲▲ ログイン画面用CSS ▲▲▲ */
 
         @media print { 
             @page { size: A4 portrait; margin: 10mm; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; width: 100%; padding: 0; margin: 0; }
-            .print-btn, input[type="range"] { display: none !important; }
+            .print-btn, input[type="range"], .user-display { display: none !important; }
             #section-phase3 { break-before: page; page-break-before: always; padding-top: 20px; }
-            #loginOverlay { display: none !important; } /* 印刷時にログイン画面を隠す */
+            #loginOverlay { display: none !important; }
         }
     </style>
 </head>
@@ -92,15 +98,18 @@
 
 <div id="loginOverlay">
     <div class="login-box">
-        <h3>ACCESS LOGIN</h3>
-        <p style="font-size:12px; color:#666;">パスワードを入力してください</p>
-        <input type="password" id="passInput" class="login-input" placeholder="Password">
-        <button class="login-btn" onclick="checkLogin()">ログイン</button>
-        <div id="loginError" class="login-error">パスワードが間違っています</div>
+        <h3>RESERVE ANY LOGIN</h3>
+        <p style="font-size:12px; color:#666;">社員IDを入力してください</p>
+        <input type="text" id="idInput" class="login-input" placeholder="User ID">
+        <button id="loginBtn" class="login-btn" onclick="executeLogin()">ログイン</button>
+        <div id="loginError" class="login-error">IDが見つかりません</div>
     </div>
 </div>
 <div class="container">
-    <header><h1>OFFICE OPTIMIZATION ROI REPORT</h1></header>
+    <header>
+        <h1>OFFICE OPTIMIZATION ROI REPORT</h1>
+        <div class="user-display">User: <span id="headerUserName"></span></div>
+    </header>
 
     <div class="client-section">
         <span style="white-space:nowrap; margin-right:15px; font-size: 14px; font-weight: bold;">FOR CLIENT:</span>
@@ -212,46 +221,75 @@
 
 <script>
     // ==========================================
-    // ▼ 設定エリア
+    // ▼ 設定エリア (GAS URLはそのまま)
     // ==========================================
-    
-    // 1. ログイン用パスワード (★ここを書き換えてください)
-    const SECRET_PASS = "1234"; 
-
-    // 2. Googleスプレッドシート連携用URL (最新のもの)
     const scriptURL = "https://script.google.com/macros/s/AKfycbxb0qlI3rkkVELIqdXYrUQRlJQujf_HI6GOUZt0Wk9X8q8RddrXvJhBboXprTt57CA7/exec";
-    
     // ==========================================
 
     let costChart, netChart, hourChart;
 
-    // ▼ ログイン処理
-    function checkLogin() {
-        const input = document.getElementById('passInput').value;
+    // ▼ ログイン実行 (GASに問い合わせる)
+    async function executeLogin() {
+        const idInput = document.getElementById('idInput').value;
+        const btn = document.getElementById('loginBtn');
         const errorMsg = document.getElementById('loginError');
-        
-        if(input === SECRET_PASS) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            sessionStorage.setItem('isLoggedIn', 'true');
-        } else {
+
+        if(!idInput) return;
+
+        // UIを「確認中」に変更
+        btn.innerText = "確認中...";
+        btn.disabled = true;
+        errorMsg.style.display = 'none';
+
+        try {
+            // GASにIDを送信して名前を取得 (GETリクエスト)
+            const response = await fetch(`${scriptURL}?id=${idInput}`);
+            const data = await response.json();
+
+            if (data.result === 'success') {
+                // 成功：名前とIDをブラウザに保存して画面を開く
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('userName', data.name);
+                sessionStorage.setItem('userId', idInput);
+                
+                unlockScreen(data.name);
+            } else {
+                // 失敗：エラー表示
+                errorMsg.innerText = "IDが見つかりません";
+                errorMsg.style.display = 'block';
+                btn.innerText = "ログイン";
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            errorMsg.innerText = "通信エラーが発生しました";
             errorMsg.style.display = 'block';
+            btn.innerText = "ログイン";
+            btn.disabled = false;
         }
+    }
+
+    // 画面のロックを解除して名前を表示
+    function unlockScreen(name) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('headerUserName').innerText = name;
     }
 
     // ページ読み込み時の処理
     document.addEventListener("DOMContentLoaded", function() {
-        // ログイン状態の確認
+        // すでにログイン済みならスキップ
         if(sessionStorage.getItem('isLoggedIn') === 'true') {
-            document.getElementById('loginOverlay').style.display = 'none';
+            unlockScreen(sessionStorage.getItem('userName'));
         }
         
-        // 日付の表示
         document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ja-JP');
-        
-        // チャートの初期化と計算実行
         initCharts();
         calc();
     });
+
+    // ------------------------------------------
+    // ▼ 以下、計算・保存処理 (名前とIDも送信)
+    // ------------------------------------------
 
     const chartDataLabels = {
         id: 'chartDataLabels',
@@ -358,7 +396,6 @@
         });
     }
 
-    // ▼ 保存・印刷処理
     async function handlePrintAndSave() {
         const btn = document.querySelector('.print-btn');
         const originalText = btn.innerText;
@@ -367,6 +404,10 @@
         btn.disabled = true;
 
         const dataToSend = {
+            // 保存したユーザー情報を付与
+            userId: sessionStorage.getItem('userId') || '不明',
+            userName: sessionStorage.getItem('userName') || '不明',
+            
             clientName: document.getElementById('clientNameInput').value || "未入力",
             tanka: document.getElementById('tanka').options[document.getElementById('tanka').selectedIndex].text,
             roomCount: document.getElementById('roomCount').value,
