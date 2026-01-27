@@ -164,28 +164,24 @@
            ▼ 印刷設定 (A4・1枚収め設定)
            ========================================= */
         @media print {
-            @page { size: A4 portrait; margin: 8mm; } /* 余白を少し狭く */
+            @page { size: A4 portrait; margin: 8mm; } 
             body { 
                 height: auto; overflow: visible; background: white; 
                 -webkit-print-color-adjust: exact; 
-                font-size: 11px; /* 全体の文字を少し小さく */
+                font-size: 11px;
             }
             
-            /* 不要な要素を消す */
             .app-header, .print-btn, .user-info, input[type="range"] { display: none !important; }
-            .no-print-section { display: none !important; } /* Phase1を消すクラス */
+            .no-print-section { display: none !important; }
 
-            /* レイアウトのリセットと1枚収め調整 */
             .main-wrapper { display: block; height: auto; }
             
-            /* 入力条件(左パネル)を上部にコンパクト表示 */
             .left-panel { 
                 width: 100%; border-bottom: 2px solid var(--navy); padding: 0 0 10px 0; margin-bottom: 15px; 
                 background: white; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;
                 border-right: none;
             }
             
-            /* 入力項目の見た目をテキスト化 */
             .input-group { margin-bottom: 2px; padding: 0; border: none; display: flex; align-items: center; justify-content: space-between; }
             .input-group label { margin: 0; font-size: 10px; color: #666; }
             .input-group input, .input-group select { 
@@ -193,15 +189,12 @@
             }
             .num-wrap input { width: auto; }
             
-            /* クライアント名とタイトル */
             #clientNameInput { font-size: 20px; border: none; font-weight: bold; margin-bottom: 10px; width: 100%; }
             h2 { font-size: 12px; margin: 0 0 5px 0; border-left: 3px solid var(--navy); padding-left: 6px; }
             section { break-inside: avoid; }
 
-            /* 右パネル(結果)の設定 */
             .right-panel { width: 100%; padding: 0; overflow: visible; background: white; }
             
-            /* KPIカードを横一列に圧縮 */
             .kpi-grid { 
                 grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; 
                 border: 1px solid #ddd; padding: 10px; border-radius: 6px;
@@ -210,15 +203,13 @@
             .kpi-value { font-size: 18px; }
             .roi-badge { position: static; display: inline-block; padding: 2px 8px; font-size: 10px; margin-bottom: 4px; }
 
-            /* グラフの高さを低くして1枚に入れる */
             .charts-container { 
                 grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; 
             }
-            .chart-box { height: 160px; padding: 5px; border: none; } /* 枠線を消してスッキリさせる */
+            .chart-box { height: 160px; padding: 5px; border: none; }
             .canvas-wrapper { height: 130px; }
             .chart-title { font-size: 10px; margin-bottom: 2px; }
 
-            /* ソリューションリスト */
             .panel-card { box-shadow: none; padding: 0; margin: 0; border: none; }
             .sol-item { margin-bottom: 8px; padding-bottom: 4px; font-size: 10px; }
         }
@@ -270,6 +261,9 @@
                     <option value="38000">渋谷区 (3.8万)</option>
                     <option value="32000" selected>中央区 (3.2万)</option>
                     <option value="30000">新宿区 (3.0万)</option>
+                    <option value="26000">品川区 (2.6万)</option>
+                    <option value="24000">目黒区 (2.4万)</option>
+                    <option value="22000">豊島区 (2.2万)</option>
                     <option value="15000">その他 (1.5万)</option>
                 </select>
             </div>
@@ -369,7 +363,7 @@
     // ==========================================
     // ▼ 設定エリア
     // ==========================================
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxb0qlI3rkkVELIqdXYrUQRlJQujf_HI6GOUZt0Wk9X8q8RddrXvJhBboXprTt57CA7/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyTH9J1_i9pQTXJszV5_NGHajjPsPDQ4AGMYGYcas0W-0LhoaueKTud4Rws0ExRgLBB/exec";
     // ==========================================
 
     let costChart, netChart, hourChart;
@@ -443,7 +437,6 @@
             data.datasets[0].data.forEach((value, index) => {
                 const { x, y } = chart.getDatasetMeta(0).data[index];
                 let label = value.toLocaleString();
-                // 印刷時に見切れないよう位置調整
                 ctx.fillText(label, x, y - 2);
             });
         }
