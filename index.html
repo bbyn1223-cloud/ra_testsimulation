@@ -56,17 +56,49 @@
         .print-btn { background: var(--navy); color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 17px; transition: opacity 0.3s; }
         .print-btn:disabled { opacity: 0.6; cursor: wait; }
 
+        /* ▼▼▼ ログイン画面用CSS ▼▼▼ */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1f3864; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 8px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 300px;
+        }
+        .login-box h3 { margin-top: 0; color: #1f3864; }
+        .login-input {
+            width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ccc;
+            border-radius: 4px; box-sizing: border-box; font-size: 16px;
+        }
+        .login-btn {
+            background: #c00000; color: white; border: none; padding: 10px 20px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;
+        }
+        .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
+        /* ▲▲▲ ログイン画面用CSS ▲▲▲ */
+
         @media print { 
             @page { size: A4 portrait; margin: 10mm; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; width: 100%; padding: 0; margin: 0; }
             .print-btn, input[type="range"] { display: none !important; }
             #section-phase3 { break-before: page; page-break-before: always; padding-top: 20px; }
+            #loginOverlay { display: none !important; } /* 印刷時にログイン画面を隠す */
         }
     </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+    <div class="login-box">
+        <h3>ACCESS LOGIN</h3>
+        <p style="font-size:12px; color:#666;">パスワードを入力してください</p>
+        <input type="password" id="passInput" class="login-input" placeholder="Password">
+        <button class="login-btn" onclick="checkLogin()">ログイン</button>
+        <div id="loginError" class="login-error">パスワードが間違っています</div>
+    </div>
+</div>
 <div class="container">
     <header><h1>OFFICE OPTIMIZATION ROI REPORT</h1></header>
 
@@ -180,12 +212,46 @@
 
 <script>
     // ==========================================
-    // ▼ GAS連携用URL (いただいた最新のURLを設定済み)
+    // ▼ 設定エリア
     // ==========================================
+    
+    // 1. ログイン用パスワード (★ここを書き換えてください)
+    const SECRET_PASS = "1234"; 
+
+    // 2. Googleスプレッドシート連携用URL (最新のもの)
     const scriptURL = "https://script.google.com/macros/s/AKfycbxb0qlI3rkkVELIqdXYrUQRlJQujf_HI6GOUZt0Wk9X8q8RddrXvJhBboXprTt57CA7/exec";
+    
     // ==========================================
 
     let costChart, netChart, hourChart;
+
+    // ▼ ログイン処理
+    function checkLogin() {
+        const input = document.getElementById('passInput').value;
+        const errorMsg = document.getElementById('loginError');
+        
+        if(input === SECRET_PASS) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            sessionStorage.setItem('isLoggedIn', 'true');
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    // ページ読み込み時の処理
+    document.addEventListener("DOMContentLoaded", function() {
+        // ログイン状態の確認
+        if(sessionStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
+        
+        // 日付の表示
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ja-JP');
+        
+        // チャートの初期化と計算実行
+        initCharts();
+        calc();
+    });
 
     const chartDataLabels = {
         id: 'chartDataLabels',
@@ -205,6 +271,33 @@
             });
         }
     };
+
+    function initCharts() {
+        const commonOpt = { 
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+            layout: { padding: { right: 80 } }, 
+            plugins: { legend: { display: false } }, 
+            scales: { x: { beginAtZero: true, grid: { display: false }, ticks: { display: false }, border: { display: false } }, y: { grid: { display: false } } } 
+        };
+        
+        costChart = new Chart(document.getElementById('costChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['利用料', '創出価値'], datasets: [{ data: [0, 0], backgroundColor: ['#1f3864', '#0070c0'], borderRadius: 4, barThickness: 20 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+
+        netChart = new Chart(document.getElementById('netChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['正味の回収額'], datasets: [{ data: [0], backgroundColor: ['#0070c0'], borderRadius: 4, barThickness: 20 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+
+        hourChart = new Chart(document.getElementById('hourChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['導入前', '目標値'], datasets: [{ data: [0, 0], backgroundColor: ['#d1d5db', '#1f3864'], borderRadius: 4, barThickness: 20 }] },
+            options: commonOpt, plugins: [chartDataLabels]
+        });
+    }
 
     function calc() {
         const tanka = parseInt(document.getElementById('tanka').value) || 0;
@@ -265,9 +358,7 @@
         });
     }
 
-    // ==========================================
-    // ▼ 保存・印刷処理 (稼働率対応版)
-    // ==========================================
+    // ▼ 保存・印刷処理
     async function handlePrintAndSave() {
         const btn = document.querySelector('.print-btn');
         const originalText = btn.innerText;
@@ -285,19 +376,15 @@
             roi: document.getElementById('roiPercent').innerText + "%", 
             netSaving: document.getElementById('dispNetSaving').innerText,
             location: document.getElementById('tanka').value,
-            
-            // 稼働率データの送信（J列・K列用）
-            beforeRate: document.getElementById('beforeVal').value + "%", // 現状
-            afterRate: document.getElementById('afterVal').value + "%"    // 目標
+            beforeRate: document.getElementById('beforeVal').value + "%", 
+            afterRate: document.getElementById('afterVal').value + "%"
         };
 
         try {
             await fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dataToSend)
             });
             console.log("送信リクエスト完了");
@@ -311,35 +398,6 @@
             window.print();
         }, 1000); 
     }
-
-    window.onload = function() {
-        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ja-JP');
-        const commonOpt = { 
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
-            layout: { padding: { right: 80 } }, 
-            plugins: { legend: { display: false } }, 
-            scales: { x: { beginAtZero: true, grid: { display: false }, ticks: { display: false }, border: { display: false } }, y: { grid: { display: false } } } 
-        };
-        
-        costChart = new Chart(document.getElementById('costChart').getContext('2d'), {
-            type: 'bar',
-            data: { labels: ['利用料', '創出価値'], datasets: [{ data: [0, 0], backgroundColor: ['#1f3864', '#0070c0'], borderRadius: 4, barThickness: 20 }] },
-            options: commonOpt, plugins: [chartDataLabels]
-        });
-
-        netChart = new Chart(document.getElementById('netChart').getContext('2d'), {
-            type: 'bar',
-            data: { labels: ['正味の回収額'], datasets: [{ data: [0], backgroundColor: ['#0070c0'], borderRadius: 4, barThickness: 20 }] },
-            options: commonOpt, plugins: [chartDataLabels]
-        });
-
-        hourChart = new Chart(document.getElementById('hourChart').getContext('2d'), {
-            type: 'bar',
-            data: { labels: ['導入前', '目標値'], datasets: [{ data: [0, 0], backgroundColor: ['#d1d5db', '#1f3864'], borderRadius: 4, barThickness: 20 }] },
-            options: commonOpt, plugins: [chartDataLabels]
-        });
-        calc();
-    };
 </script>
 </body>
 </html>
