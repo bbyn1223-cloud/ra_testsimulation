@@ -42,7 +42,6 @@
         }
         .app-title { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
         
-        /* ユーザー情報とログアウトボタンのラッパー */
         .header-right {
             display: flex;
             align-items: center;
@@ -50,7 +49,6 @@
         }
         .user-info { font-size: 13px; opacity: 0.9; }
         
-        /* ログアウトボタン */
         .logout-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.5);
@@ -72,7 +70,6 @@
             height: calc(100vh - 60px);
         }
 
-        /* 左パネル */
         .left-panel {
             width: 380px;
             background: white;
@@ -85,7 +82,6 @@
             gap: 20px;
         }
 
-        /* 右パネル */
         .right-panel {
             flex-grow: 1;
             padding: 20px;
@@ -120,7 +116,6 @@
         .task-item { display: flex; margin-bottom: 8px; font-size: 12px; cursor: pointer; }
         .task-item input { margin-right: 8px; margin-top: 2px; }
 
-        /* KPIグリッド */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -140,7 +135,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* チャートエリア */
         .charts-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -168,7 +162,6 @@
         .print-btn:hover { background: var(--dark-navy); }
         .print-btn:disabled { opacity: 0.6; cursor: wait; }
 
-        /* --- ログイン画面 --- */
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--navy); z-index: 9999;
@@ -182,13 +175,15 @@
         .login-btn { background: var(--accent-red); color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
 
+        /* 印刷時の注釈（デフォルト非表示） */
+        .print-notes { display: none; }
 
         /* =========================================
-           ▼ 印刷設定 (スライド用・横向き・1枚収め)
+           ▼ 印刷設定
            ========================================= */
         @media print {
             @page { 
-                size: A4 landscape; /* 横向き */
+                size: A4 landscape; 
                 margin: 5mm; 
             }
             
@@ -198,20 +193,15 @@
                 overflow: hidden; 
                 background: white; 
                 -webkit-print-color-adjust: exact; 
-                zoom: 80%; /* スライドとして1枚に収めるための縮小率 */
+                zoom: 80%; 
             }
             
-            /* 不要なUI要素を非表示（ヘッダー全体ではなく、中の要素を制御） */
             .print-btn, #loginOverlay, input[type="range"] { 
                 display: none !important; 
             }
             .no-print-section { display: none !important; }
+            .logout-btn, .user-info { display: none !important; }
 
-            /* ログアウトボタンも印刷時は隠す */
-            .logout-btn { display: none !important; }
-            .user-info { display: none !important; }
-
-            /* レイアウト：画面と同じ左右分割を強制 */
             .main-wrapper { 
                 display: flex !important;
                 flex-direction: row !important;
@@ -219,7 +209,6 @@
                 gap: 20px;
             }
 
-            /* --- ヘッダー（スライドタイトル風） --- */
             .app-header {
                 position: static;
                 height: 50px;
@@ -227,13 +216,10 @@
                 color: white !important;
                 margin-bottom: 15px;
                 border-bottom: none;
-                justify-content: center; /* タイトルを中央へ */
+                justify-content: center;
             }
-            .app-title {
-                font-size: 24px; /* タイトルを少し大きく */
-            }
+            .app-title { font-size: 24px; }
             
-            /* --- 左パネル（条件エリア） --- */
             .left-panel { 
                 width: 300px !important; 
                 flex-shrink: 0;
@@ -272,13 +258,12 @@
                 margin-bottom: 20px;
             }
 
-            /* --- 右パネル（結果エリア） --- */
             .right-panel { 
-                flex-grow: 1 !important;
+                flex-grow: 1 !important; 
                 padding: 0 !important; 
-                background: white !important;
-                border: none;
-                overflow: visible !important;
+                background: white !important; 
+                border: none; 
+                overflow: visible !important; 
             }
             
             .kpi-grid { 
@@ -312,6 +297,89 @@
                 padding: 15px;
             }
             .sol-item { font-size: 11px; }
+
+            /* ▼ 印刷時のみ表示する注釈エリア ▼ */
+            .print-notes {
+                display: block !important;
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                width: auto;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid #ccc;
+                padding: 8px 12px;
+                font-size: 9px;
+                color: #333;
+                z-index: 1000;
+                text-align: left;
+                border-radius: 4px;
+                line-height: 1.4;
+            }
+            .print-notes h4 {
+                margin: 0 0 4px 0;
+                font-size: 10px;
+                color: var(--navy);
+                border-bottom: 1px solid #ddd;
+            }
+            .print-notes ul {
+                margin: 0; padding-left: 15px;
+            }
+        }
+
+        /* =========================================
+           ▼ ツールチップのスタイル調整
+           ========================================= */
+        .tooltip-container {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #888;
+            display: inline-block;
+        }
+
+        .tooltip-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: normal;
+            width: max-content;
+            max-width: 400px;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 9999;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        .tooltip-container::before {
+            content: "";
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .tooltip-container:hover::after,
+        .tooltip-container:hover::before {
+            opacity: 1;
+            visibility: visible;
+            bottom: 100%;
         }
     </style>
 </head>
@@ -400,7 +468,7 @@
             <div class="input-group">
                 <label>稼働率改善 (現在→目標)</label>
                 <div class="num-wrap">
-                   <span style="font-size:12px; font-weight:bold;"><span id="dispBefore">60%</span> → <span id="dispAfter">75%</span></span>
+                    <span style="font-size:12px; font-weight:bold;"><span id="dispBefore">60%</span> → <span id="dispAfter">75%</span></span>
                 </div>
                 <input type="range" id="beforeSlide" min="10" max="90" value="60" oninput="updateRateLabel(); calc()">
                 <input type="range" id="afterSlide" min="10" max="100" value="75" oninput="updateRateLabel(); calc()">
@@ -410,7 +478,7 @@
             
             <div class="input-group" style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;">
                  <label>月間資産維持費</label>
-                 <strong><span id="dispTotalOffice">0</span> 円</strong>
+                 <strong><span id="dispTotalOffice" class="tooltip-container" data-tooltip="（会議室総面積 ＋ ブース総面積）× エリア坪単価">0</span> 円</strong>
             </div>
         </section>
         
@@ -421,19 +489,19 @@
         
         <div class="kpi-grid">
             <div class="kpi-card" style="border: 2px solid var(--accent-red); background:#fff5f5;">
-                <span class="roi-badge">ROI: <span id="roiPercent">0</span>%</span>
+                <span class="roi-badge">ROI: <span id="roiPercent" class="tooltip-container" data-tooltip="コスト回収メリット ÷ ツール利用料 × 100">0</span>%</span>
                 <span class="kpi-label">月間コスト回収メリット</span>
-                <span class="kpi-value" id="dispNetSaving" style="color:var(--accent-red)">0</span>
+                <span class="kpi-value tooltip-container" id="dispNetSaving" style="color:var(--accent-red)" data-tooltip="スペース活用価値 － ツール利用料（ID数×450円）">0</span>
                 <span style="font-size:12px;">円 / 月</span>
             </div>
             <div class="kpi-card">
                 <span class="kpi-label">創出される有効時間</span>
-                <span class="kpi-value" id="dispHour" style="color:var(--creation-blue)">0</span>
+                <span class="kpi-value tooltip-container" id="dispHour" style="color:var(--creation-blue)" data-tooltip="総可能稼働時間（室数×8h×20日） × 稼働率改善ポイント">0</span>
                 <span style="font-size:12px;">時間 / 月</span>
             </div>
             <div class="kpi-card">
                 <span class="kpi-label">スペース資産活用価値</span>
-                <span class="kpi-value" id="dispGrossSaving">0</span>
+                <span class="kpi-value tooltip-container" id="dispGrossSaving" data-tooltip="月間資産維持費 × （目標稼働率 － 現状稼働率）">0</span>
                 <span style="font-size:12px;">円 / 月</span>
             </div>
         </div>
@@ -464,12 +532,20 @@
     </div>
 </div>
 
+<div class="print-notes">
+    <h4>【算出根拠一覧】</h4>
+    <ul>
+        <li><strong>月間資産維持費:</strong> （会議室総面積 ＋ ブース総面積）× エリア坪単価</li>
+        <li><strong>スペース資産活用価値:</strong> 月間資産維持費 × （目標稼働率 － 現状稼働率）</li>
+        <li><strong>コスト回収メリット:</strong> スペース活用価値 － ツール利用料（ID数×450円）</li>
+        <li><strong>ROI (投資対効果):</strong> コスト回収メリット ÷ ツール利用料 × 100</li>
+        <li><strong>創出される有効時間:</strong> 総可能稼働時間 × 稼働率改善ポイント</li>
+        <li><strong>会議室増設換算:</strong> 創出時間 ÷ 160時間（1室の月間最大稼働時間 8h×20日）</li>
+    </ul>
+</div>
+
 <script>
-    // ==========================================
-    // ▼ 設定エリア
-    // ==========================================
     const scriptURL = "https://script.google.com/macros/s/AKfycby9qhaxmrnlF3LYA3vuoI0RPYFHwbTasdwL5bvibaNH7WkKHU56j1FxwYKtfUzCI2I4/exec";
-    // ==========================================
 
     let costChart, netChart, hourChart;
 
@@ -482,13 +558,10 @@
         document.getElementById('dispAfter').innerText = a + "%";
     }
 
-    // --- ログアウト処理 ---
     function logout() {
-        // セッションストレージをクリア
         sessionStorage.removeItem('isLoggedIn');
         sessionStorage.removeItem('userName');
         sessionStorage.removeItem('userId');
-        // ページをリロードしてログイン画面に戻す
         location.reload();
     }
 
@@ -643,7 +716,10 @@
         const dynamicMessages = [
             { title: "面積資産の活用価値を最大化", text: `現状の稼働率から${Math.round(aRate*100)}%への最適化により、月間約${grossSaving.toLocaleString()}円相当の「新しい価値」をオフィスから創出します。` },
             { title: "個室・ブースの回転率向上", text: `${booths}台のブース利用を効率化。WEB会議の急増によるブース不足を、Reserve Any の予約集約アルゴリズムで解消します。` },
-            { title: `月間${hDiff}時間の会議枠を創出`, text: `増床コストなしで、月間${hDiff}時間分の活動スペースを実質的に生み出します。これは会議室${(hDiff/160).toFixed(1)}室分を増設するのと同等の価値です。` },
+            
+            // ▼ 変更点：ここにもツールチップ用HTMLを埋め込みました
+            { title: `月間${hDiff}時間の会議枠を創出`, text: `増床コストなしで、月間${hDiff}時間分の活動スペースを実質的に生み出します。これは会議室<span class="tooltip-container" data-tooltip="創出時間 ÷ 160時間（1室の月間最大稼働時間 8h×20日）">${(hDiff/160).toFixed(1)}室分</span>を増設するのと同等の価値です。` },
+            
             { title: "客観的データに基づく適正化", text: `月間${officeCost.toLocaleString()}円の維持費に対し、Reserve Any のデータを活用して無駄のない拠点運営を実現。将来的な賃料ロスを未然に防ぎます。` }
         ];
         checks.forEach((c, i) => {
