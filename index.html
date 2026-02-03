@@ -181,45 +181,86 @@
         .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
 
 
+        /* =========================================
+           ▼ 印刷設定 (究極の最適化版)
+           ========================================= */
         @media print {
             @page { 
                 size: A4 landscape;
-                margin: 5mm; 
+                margin: 0; 
             }
             
             body { 
-                height: 100%; width: 100%; overflow: hidden; background: white; -webkit-print-color-adjust: exact; zoom: 80%; 
+                height: 100%; width: 100%; overflow: hidden; background: white; 
+                -webkit-print-color-adjust: exact; 
+                zoom: 88%; /* コンテンツを大きく表示 */
+                display: block !important;
+                padding: 4mm 8mm !important; /* 物理的な余白を最小に */
             }
             
-            .print-btn, #loginOverlay, input[type="range"] { display: none !important; }
-            .no-print-section { display: none !important; }
-            .logout-btn { display: none !important; }
-            .user-info { display: none !important; }
+            /* 印刷時に隠す要素 */
+            .print-btn, #loginOverlay, input[type="range"], .logout-btn, .user-info { display: none !important; }
+            
+            /* 印刷時に表示させる計算根拠(課題) */
+            .left-panel .no-print-section { display: block !important; margin-bottom: 10px; }
 
-            .main-wrapper { display: flex !important; flex-direction: row !important; height: auto !important; gap: 20px; }
-            .app-header { position: static; height: 50px; background: var(--navy) !important; color: white !important; margin-bottom: 15px; border-bottom: none; justify-content: center; }
-            .app-title { font-size: 24px; }
+            .main-wrapper { 
+                display: flex !important; 
+                flex-direction: row !important; 
+                height: auto !important; 
+                gap: 15px;
+                margin: 0;
+                width: 100% !important;
+            }
+
+            .app-header { 
+                position: static; height: 45px; background: var(--navy) !important; color: white !important; 
+                margin: -4mm -8mm 12px -8mm; padding: 0 15px;
+                border-bottom: none; justify-content: center; 
+            }
+            .app-title { font-size: 22px; }
             
             .left-panel { 
-                width: 300px !important; flex-shrink: 0; border: 2px solid var(--navy) !important; background: #f8f9fa !important; padding: 15px !important; display: block !important; border-radius: 8px;
+                width: 270px !important; /* 左パネルをスリムにして右側を広く */
+                flex-shrink: 0; border: 2px solid var(--navy) !important; 
+                background: #f8f9fa !important; padding: 10px !important; 
+                display: block !important; border-radius: 6px;
             }
-            .input-group { margin-bottom: 12px; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
-            .input-group label { margin-bottom: 0; color: #555; font-size: 11px; }
+            
+            /* 課題リスト(計算根拠)のデザイン調整 */
+            .task-list { background: transparent !important; border: none; padding: 0; }
+            .task-item { margin-bottom: 4px; font-size: 9px !important; color: #333; }
+            .task-item input { display: none; } /* チェックボックスは隠してテキストのみに */
+            .task-item span::before { content: "✔ "; color: var(--accent-red); font-weight: bold; }
+
+            .input-group { margin-bottom: 6px; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+            .input-group label { margin-bottom: 0; color: #555; font-size: 9px; }
+            
             input[type="number"], select, input[type="text"] { 
-                border: none !important; background: transparent !important; font-weight: bold; font-size: 14px; text-align: right; padding: 0; box-shadow: none; appearance: none; -webkit-appearance: none;
+                border: none !important; background: transparent !important; font-weight: bold; font-size: 13px; 
+                text-align: right; padding: 0; box-shadow: none; appearance: none; -webkit-appearance: none;
             }
             .num-wrap { justify-content: flex-end; }
-            #clientNameInput { text-align: left; font-size: 22px !important; color: var(--navy); border-bottom: 2px solid var(--accent-red) !important; margin-bottom: 20px; }
+            #clientNameInput { text-align: left; font-size: 20px !important; color: var(--navy); border-bottom: 3px solid var(--accent-red) !important; margin-bottom: 12px; }
 
-            .right-panel { flex-grow: 1 !important; padding: 0 !important; background: white !important; border: none; overflow: visible !important; }
-            .kpi-grid { grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-            .kpi-card { padding: 10px; border: 1px solid #ddd; box-shadow: none; background: white; }
-            .kpi-value { font-size: 24px; }
-            .charts-container { grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-            .chart-box { height: 200px; padding: 10px; border: 1px solid #ddd; }
-            .canvas-wrapper { height: 160px; }
-            .panel-card { box-shadow: none; border: 1px solid #ddd; padding: 15px; }
-            .sol-item { font-size: 11px; }
+            .right-panel { 
+                flex: 1 !important; padding: 0 !important; background: white !important; 
+                border: none; overflow: visible !important;
+            }
+            
+            .kpi-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; margin-bottom: 12px; }
+            .kpi-card { padding: 6px; border: 1px solid #ddd; box-shadow: none; background: white; }
+            .kpi-label { font-size: 10px; }
+            .kpi-value { font-size: 20px; }
+            .roi-badge { padding: 2px 6px; font-size: 9px; }
+            
+            .charts-container { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; margin-bottom: 12px; }
+            .chart-box { height: 165px; padding: 5px; border: 1px solid #ddd; }
+            .canvas-wrapper { height: 135px; }
+            
+            .panel-card { box-shadow: none; border: 1px solid #ddd; padding: 10px; }
+            .sol-item { font-size: 10px; margin-bottom: 4px; padding-bottom: 3px; }
+            h2 { font-size: 11px; margin-bottom: 6px; padding-left: 5px; border-left-width: 3px; }
         }
     </style>
 </head>
@@ -250,12 +291,12 @@
             <input type="text" id="clientNameInput" placeholder="貴社名を入力" style="font-weight:bold; font-size:16px;">
         </div>
         <section class="no-print-section">
-            <h2>01. 運用課題</h2>
+            <h2>01. 運用課題(計算根拠)</h2>
             <div class="task-list">
-                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()" checked><span>【ミスマッチ】広い会議室を少人数で利用</span></label>
-                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()"><span>【独占】特定の部署・人が予約を独占</span></label>
-                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()" checked><span>【隙間時間】予約間の15-30分が無駄</span></label>
-                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()"><span>【データ不足】増床判断の根拠がない</span></label>
+                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()" checked><span>広い会議室を少人数で利用</span></label>
+                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()"><span>特定の部署・人が予約を独占</span></label>
+                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()" checked><span>予約間の15-30分が無駄</span></label>
+                <label class="task-item"><input type="checkbox" class="task-check" onchange="calc()"><span>増床判断の根拠がない</span></label>
             </div>
         </section>
         <section>
@@ -267,7 +308,6 @@
                     <div style="display:flex; flex-wrap:wrap; gap:5px;">
                         <span>港区:6.3万</span> <span>千代田:6.0万</span> <span>渋谷:5.7万</span>
                         <span>中央:4.8万</span> <span>新宿:4.5万</span> <span>品川:3.9万</span>
-                        <span>目黒:3.6万</span> <span>豊島:3.3万</span>
                     </div>
                 </div>
             </div>
@@ -338,7 +378,6 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycby9qhaxmrnlF3LYA3vuoI0RPYFHwbTasdwL5bvibaNH7WkKHU56j1FxwYKtfUzCI2I4/exec";
     let costChart, netChart, hourChart;
 
-    // --- PWA Service Worker 登録 ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
